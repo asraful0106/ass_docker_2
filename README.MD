@@ -1,28 +1,4 @@
-# Module 10 Assignment: Dockerize and Deploy Express.js App with Docker Compose + Nginx
 
-## Overview
-
-This project containerizes the Express.js app from [roy35-909/Module-3-deployment](https://github.com/roy35-909/Module-3-deployment) and runs it alongside Nginx using Docker Compose, exposed on port **8080**.
-
----
-
-## Project Structure
-
-After completing this assignment, your repository should look like this:
-
-```
-Module-3-deployment/
-├── src/
-│   └── server.js
-├── test/
-├── Dockerfile
-├── docker-compose.yml
-├── nginx.conf
-├── package.json
-└── README.md
-```
-
----
 
 ## Step 1: Clone the Repository
 
@@ -31,8 +7,6 @@ git clone https://github.com/roy35-909/Module-3-deployment.git
 cd Module-3-deployment
 ```
 
-> 📸 **Screenshot required:** Terminal showing the `git clone` command and the cloned directory listing (`ls -la`).
-
 ---
 
 ## Step 2: Create the Dockerfile
@@ -40,30 +14,22 @@ cd Module-3-deployment
 Create a file named `Dockerfile` in the root of the project:
 
 ```dockerfile
-# Use official Node.js 22 image as base
-FROM node:22-alpine
+FROM node:18-alpine
 
-# Set working directory inside the container
-WORKDIR /app
+WORKDIR /app 
 
-# Copy package files first (for layer caching)
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm install --omit=dev
+RUN npm install --production
 
-# Copy the rest of the application source
-COPY . .
+COPY . . 
 
-# Expose the app port
 EXPOSE 3000
 
-# Start the Express server
-CMD ["node", "src/server.js"]
+ENV PORT=3000
+
+CMD ["npm", "start"]
 ```
-
-> 📸 **Screenshot required:** The `Dockerfile` open in your editor or shown via `cat Dockerfile`.
-
 ---
 
 ## Step 3: Create the Nginx Configuration
@@ -89,8 +55,6 @@ http {
     }
 }
 ```
-
-> 📸 **Screenshot required:** The `nginx.conf` file open in your editor or shown via `cat nginx.conf`.
 
 ---
 
@@ -127,7 +91,6 @@ services:
 - `app` starts before `nginx` is considered ready (`depends_on`).
 - Only port `8080` is exposed to the host — through Nginx.
 
-> 📸 **Screenshot required:** The `docker-compose.yml` file open in your editor or shown via `cat docker-compose.yml`.
 
 ---
 
@@ -139,16 +102,11 @@ services:
 docker login
 ```
 
-Enter your DockerHub username and password when prompted.
 
-> 📸 **Screenshot required:** Terminal showing successful `docker login` — `Login Succeeded`.
-
-### 5.2 Build the image with your DockerHub username
-
-Replace `<your-dockerhub-username>` with your actual DockerHub username:
+### 5.2 Build the image with my DockerHub username
 
 ```bash
-docker build -t <your-dockerhub-username>/module10-express-app:latest .
+docker build -t <my-dockerhub-username>/module10-express-app:latest .
 ```
 
 Example:
@@ -156,21 +114,21 @@ Example:
 docker build -t asraful/module10-express-app:latest .
 ```
 
-> 📸 **Screenshot required:** Terminal showing the build output with all steps completing successfully.
+![Project Images](images/5-2.png)
 
 ### 5.3 Push the image to DockerHub
 
 ```bash
-docker push <your-dockerhub-username>/module10-express-app:latest
+docker push <my-dockerhub-username>/module10-express-app:latest
 ```
 
-> 📸 **Screenshot required:** Terminal showing the push output — layers being pushed and the final digest line.
+![Project Images](images/5-3.png)
 
 ### 5.4 Verify on DockerHub
 
-Go to `https://hub.docker.com/r/<your-dockerhub-username>/module10-express-app` and confirm the image is listed.
+Go to `https://hub.docker.com/r/<my-dockerhub-username>/module10-express-app` and confirm the image is listed.
 
-> 📸 **Screenshot required:** DockerHub web page showing your pushed image with its tag and push timestamp.
+![Project Images](images/5-4.png)
 
 ---
 
@@ -180,10 +138,9 @@ Go to `https://hub.docker.com/r/<your-dockerhub-username>/module10-express-app` 
 docker compose up --build
 ```
 
-You should see both containers starting — Nginx and the Express app.
+I should see both containers starting — Nginx and the Express app.
 
-> 📸 **Screenshot required:** Terminal showing both services starting up, with logs like `nginx  | ...` and `express-app | Server is running...` (or similar).
-
+![Project Images](images/6.png)
 To run in detached (background) mode:
 
 ```bash
@@ -202,14 +159,12 @@ docker compose ps
 
 ## Step 7: Verify in the Browser
 
-Open your browser and go to:
+Open my browser and go to:
 
 - **Home route:** `http://localhost:8080/` → Should display a Hello World page
 - **API route:** `http://localhost:8080/api` → Should return a JSON response
 
-> 📸 **Screenshot required (x2):**
-> 1. Browser showing `http://localhost:8080/` with the Hello World page.
-> 2. Browser showing `http://localhost:8080/api` with the JSON response.
+![Project Images](images/7.png)
 
 ---
 
@@ -220,11 +175,12 @@ curl http://localhost:8080/
 curl http://localhost:8080/api
 ```
 
-> 📸 **Screenshot required:** Terminal showing the curl output for both routes.
+
+![Project Images](images/8.png)
 
 ---
 
-## Step 9: Commit and Push Files to GitHub
+## Commit and Push Files to GitHub
 
 ```bash
 git add Dockerfile docker-compose.yml nginx.conf README.md
@@ -232,42 +188,20 @@ git commit -m "Add Dockerfile, docker-compose.yml, and nginx config for Module 1
 git push origin main
 ```
 
-> 📸 **Screenshot required:** Terminal showing the `git push` completing successfully, and the GitHub repository page showing the new files.
-
 ---
 
-## Step 10: Stop the Containers
+## Stop the Containers
 
 ```bash
 docker compose down
 ```
-
-> 📸 **Screenshot required:** Terminal showing the containers stopping.
-
 ---
-
-## Submission Checklist
-
-| Item | Details |
-|------|---------|
-| ✅ Dockerfile | Added to repository root |
-| ✅ docker-compose.yml | Added to repository root |
-| ✅ nginx.conf | Added to repository root |
-| ✅ DockerHub image pushed | `docker.io/<your-username>/module10-express-app:latest` |
-| ✅ App accessible on port 8080 | Via Nginx reverse proxy |
-| ✅ Express app starts after Nginx | Controlled by `depends_on` |
-| ✅ Screenshots compiled into PDF | All steps documented |
-| ✅ GitHub repo link shared | Public repository |
-
----
-
 ## DockerHub Image Link
 
 ```
-https://hub.docker.com/r/<your-dockerhub-username>/module10-express-app
+https://hub.docker.com/r/asraful0106/module10-express-app
 ```
 
-> Replace `<your-dockerhub-username>` with your actual DockerHub username before submitting.
 
 ---
 
